@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FInalProject.classes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
@@ -11,6 +12,11 @@ namespace FInalProject
     [ServiceContract]
     public interface IService1
     {
+
+        [OperationContract]
+        User Login(string username, string password);
+
+        //bool
         [OperationContract]
         bool HasUsername(string username);
         [OperationContract]
@@ -18,9 +24,50 @@ namespace FInalProject
         [OperationContract]
         bool ValidateUser(User user);
         [OperationContract]
+        bool AddStats(LevelStats levelStats);
+
+        //user
+        [OperationContract]
+        User FindUser(string username);
+       
+
+        //List<User>
+        [OperationContract]
         List<User> GetUsers();
+
+      
+        
+
+        [OperationContract]
+        LevelStats GetLevelStatsById(int id);
+
+
+        //List<LevelStats> 
+        [OperationContract]
+        List<LevelStats> GetLevelStats();
+
+        [OperationContract]
+        List<LevelStats> GetLevelStatsPerUser(string Name);
+
+        [OperationContract]
+        List<LevelStats> GetLevelStatsByLevelId(int LevelId);
+
+
+        //List<UserAndLevel>
+        [OperationContract]
+        List<UserAndLevel> GetAvgScore();
+
+
+
+       //tester if the service update 
+        [OperationContract]
+        int test();
+        // test if the update of the service reference works 
+        [OperationContract]
+        bool black();
+
     }
 
-  
-    
+
+
 }

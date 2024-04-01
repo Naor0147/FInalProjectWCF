@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace FInalProject
 {
     [DataContract]
+
     public class User
     {
         [DataMember]
@@ -26,6 +28,18 @@ namespace FInalProject
             Password = password;
             Mail = mail;
             YearBorn = yearBorn;
+        }
+        [OperationContract]
+
+        public override string ToString()
+        {
+            return $"Name:{Name} , Password:{Password} , mail:{Mail} , year born:{YearBorn} ";
+        }
+        [OperationContract]
+        public string UserToString()
+        {
+            return $"Name:{Name} , Password:{Password} , mail:{Mail} , year born:{YearBorn} ";
+
         }
     }
 }
