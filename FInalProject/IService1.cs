@@ -59,7 +59,19 @@ namespace FInalProject
 
 
 
-       //tester if the service update 
+        //New
+        [OperationContract]
+        
+        List<AvgStats2> GetAvgScore2();
+        [OperationContract]
+
+        List<CompletedLevelsQuery> GetCompletedLevelsQuery();
+        [OperationContract]
+
+        bool DeleteUser(string name);
+
+
+        //tester if the service update 
         [OperationContract]
         int test();
         // test if the update of the service reference works 

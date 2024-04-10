@@ -389,9 +389,108 @@ namespace FInalProject
         }
         public int test()
         {
-            return 5;
+            return 7;
         }
         public bool black() {  return true; }
 
+        public List<AvgStats2> GetAvgScore2()
+        {
+            string query = $"select Name ,count(Name) as [AmountOfGames] ,Avg(Cast(TimePassed as float)) as [AvgTimePassed] ,Avg(Cast(Coins as float)) as [AvgCoins],AVG ( Cast(NumberOfCoins as Float)) as [AvgUnitsOfCoins] , AVG (Cast(TimeClicked as Float)) as [AvgTimeClicked]\r\nfrom PlayerStats\r\ngroup by Name ";
+            SqlConnection connection = new SqlConnection(ConnectionString);
+            SqlCommand cmd = new SqlCommand(query, connection);
+            List<AvgStats2> Stats = new List<AvgStats2>();
+
+            try
+            {
+                connection.Open();
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Stats.Add(new AvgStats2((string)reader["Name"], (int)reader["AmountOfGames"], (double)reader["AvgTimePassed"], (double)reader["AvgCoins"], (double)reader["AvgUnitsOfCoins"], 5));
+                    
+                    //Stats.Add(new AvgStats2((string)reader["Name"], (int)reader["AmountOfGames"], Convert.ToDouble((float)(double)reader["AvgTimePassed"]), 3, 4, 5));
+                }
+                reader.Close();
+                return Stats;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e}");
+                return Stats;
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
+            }
+
+        }
+
+        public List<CompletedLevelsQuery> GetCompletedLevelsQuery()
+        {
+            string query = $"SELECT\r\n    PlayerStats.Name,\r\n\tAVg (Users.YearBorn) as YearBorn,\r\n    COUNT( PlayerStats.LevelId) AS CompletedLevels,\r\n\tSum( PlayerStats.TimePassed) as TotalTimePassed,\r\n\tSum( PlayerStats.NumberOfCoins) as NumberOfCoinsCollected \r\n\t\r\nFROM PlayerStats join Users On PlayerStats.Name = Users.Name\r\nwhere yearBorn >587\r\n\t\r\nGROUP BY\r\n    PlayerStats.Name\r\n\r\nORDER BY\r\n    CompletedLevels DESC\r\n\r\n";
+            SqlConnection connection = new SqlConnection(ConnectionString);
+            SqlCommand cmd = new SqlCommand(query, connection);
+            List<CompletedLevelsQuery> Stats = new List<CompletedLevelsQuery>();
+
+            try
+            {
+                connection.Open();
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Stats.Add(new CompletedLevelsQuery((string)reader["Name"], (int)reader["YearBorn"], (int)reader["CompletedLevels"], (int)reader["TotalTimePassed"], (int)reader["NumberOfCoinsCollected"]));
+
+                    //Stats.Add(new AvgStats2((string)reader["Name"], (int)reader["AmountOfGames"], Convert.ToDouble((float)(double)reader["AvgTimePassed"]), 3, 4, 5));
+                }
+                reader.Close();
+                return Stats;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e}");
+                return Stats;
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
+            }
+        }
+
+        public bool DeleteUser(string name)
+        {
+            
+
+            string query = $"DELETE FROM Users WHERE Name = '{name}';DELETE FROM PlayerStats WHERE Name = '{name}'";
+            SqlConnection connection = new SqlConnection(ConnectionString);
+            SqlCommand cmd = new SqlCommand(query, connection);
+
+            try
+            {
+                connection.Open();
+                return cmd.ExecuteNonQuery() != 0;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e}");
+                return false;
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
+            }
+        }
+       
+
+        
+    
     }
-    }
+}
