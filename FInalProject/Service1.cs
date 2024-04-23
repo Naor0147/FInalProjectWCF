@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Xml.Linq;
 
 namespace FInalProject
 {
@@ -488,9 +489,28 @@ namespace FInalProject
                     connection.Close();
             }
         }
-       
 
-        
-    
+        public bool UpdateUser(string CurrentUsername, string NewUsername, string password, int YearBorn, string Mail)
+        {
+            string query = $"update Users \r\nset Name = '{NewUsername}' ,Password ='{password}',YearBorn = {YearBorn},Mail='{Mail}'\r\nwhere Name = '{CurrentUsername}'\r\nupdate PlayerStats \r\nset Name = '{NewUsername}' \r\nwhere Name = '{CurrentUsername}'";
+            SqlConnection connection = new SqlConnection(ConnectionString);
+            SqlCommand cmd = new SqlCommand(query, connection);
+
+            try
+            {
+                connection.Open();
+                return cmd.ExecuteNonQuery() != 0;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e}");
+                return false;
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
+            }
+        }
     }
 }

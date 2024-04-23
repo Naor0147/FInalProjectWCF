@@ -71,6 +71,10 @@ namespace FInalProject
         bool DeleteUser(string name);
 
 
+        [OperationContract]
+        bool UpdateUser(string CurrentUsername , string NewUsername, string password, int YearBorn, string Mail);
+
+
         //tester if the service update 
         [OperationContract]
         int test();
