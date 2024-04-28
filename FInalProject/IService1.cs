@@ -74,6 +74,24 @@ namespace FInalProject
         [OperationContract]
         bool UpdateUser(string CurrentUsername , string NewUsername, string password, int YearBorn, string Mail);
 
+        [OperationContract]
+        List<SumQuery1> ShowTheSumOfScoresPerUser(int MinYear);
+        
+        [OperationContract]
+        List<SumQuery1> ShowTheAvgOfScoresPerUser();
+
+
+        [OperationContract]
+         List<TimeToBeatPerUser> ShortestTimeTookUserToBeatLevel();
+
+        [OperationContract]
+        List<TimeToBeatPerUser> LongestTimeTookUserToBeatLevel();
+
+        [OperationContract]
+        List<TimeToBeatPerUser> FastestTimeItTookToBeatEachLevel();
+        [OperationContract]
+        List<TimeToBeatPerUser> SlowestTimeItTookToBeatEachLevel();
+
 
         //tester if the service update 
         [OperationContract]

@@ -47,6 +47,8 @@
     <Compile Include="classes\AvgScore.cs" />
     <Compile Include="classes\AvgStats2.cs" />
     <Compile Include="classes\CompletedLevelsQuery.cs" />
+    <Compile Include="classes\SumQuery1.cs" />
+    <Compile Include="classes\TimeToBeatPerUser.cs" />
     <Compile Include="classes\UserAndLevel.cs" />
     <Compile Include="IService1.cs" />
     <Compile Include="classes\LevelStats.cs" />

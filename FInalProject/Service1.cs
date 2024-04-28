@@ -512,5 +512,257 @@ namespace FInalProject
                     connection.Close();
             }
         }
+        
+        public List<SumQuery1> ShowTheSumOfScoresPerUser(int MinYear)
+        {
+            string query = $"select PlayerStats.Name , COUNT(PlayerStats.Name ) as GamesPlayed  ,sum( PlayerStats.TimePassed) as TimePassed , sum(Coins) as Coins ,sum(NumberOfCoins) as NumberOfCoins, sum(TimeClicked) as TimeClicked ,Users.YearBorn ,Users.Mail from PlayerStats" +
+                $" \r\njoin Users\r\non Users.Name = PlayerStats.Name\r\n" +
+                $"where Users.YearBorn>{MinYear}\r\n" +
+                $"group by PlayerStats.Name ,Users.YearBorn , users.Mail\r\n";
+            SqlConnection connection = new SqlConnection(ConnectionString);
+            SqlCommand cmd = new SqlCommand(query, connection);
+            List<SumQuery1> Stats = new List<SumQuery1>();
+
+            try
+            {
+                connection.Open();
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Stats.Add(new SumQuery1((string)reader["Name"], (int)reader["GamesPlayed"], (int)reader["TimePassed"], (int)reader["Coins"], (int)reader["NumberOfCoins"],(int)reader["TimeClicked"], (int)reader["YearBorn"], (string)reader["Mail"]));
+
+                    //Stats.Add(new AvgStats2((string)reader["Name"], (int)reader["AmountOfGames"], Convert.ToDouble((float)(double)reader["AvgTimePassed"]), 3, 4, 5));
+                }
+                reader.Close();
+                return Stats;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e}");
+                return Stats;
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
+            }
+        }
+        public List<SumQuery1> ShowTheAvgOfScoresPerUser()
+        {
+            string query = $"select PlayerStats.Name , COUNT(PlayerStats.Name ) as GamesPlayed  ,AVG( PlayerStats.TimePassed) as TimePassed , AVG(Coins) as Coins ,AVG(NumberOfCoins) as NumberOfCoins, AVG(TimeClicked) as TimeClicked ,Users.YearBorn ,Users.Mail from PlayerStats \r\njoin Users\r\non Users.Name = PlayerStats.Name\r\ngroup by PlayerStats.Name ,Users.YearBorn , users.Mail\r\n\r\n";
+            SqlConnection connection = new SqlConnection(ConnectionString);
+            SqlCommand cmd = new SqlCommand(query, connection);
+            List<SumQuery1> Stats = new List<SumQuery1>();
+
+            try
+            {
+                connection.Open();
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Stats.Add(new SumQuery1((string)reader["Name"], (int)reader["GamesPlayed"], (int)reader["TimePassed"], (int)reader["Coins"], (int)reader["NumberOfCoins"], (int)reader["TimeClicked"], (int)reader["YearBorn"], (string)reader["Mail"]));
+
+                    //Stats.Add(new AvgStats2((string)reader["Name"], (int)reader["AmountOfGames"], Convert.ToDouble((float)(double)reader["AvgTimePassed"]), 3, 4, 5));
+                }
+                reader.Close();
+                return Stats;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e}");
+                return Stats;
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
+            }
+        }
+
+        List<TimeToBeatPerUser> IService1.ShortestTimeTookUserToBeatLevel()
+        {
+            string query = $"\r\nWITH RankedPlayerStats AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER (PARTITION BY Name ORDER BY TimePassed ) AS RowNum\r\n    FROM PlayerStats\r\n    \r\n)\r\n\r\nSELECT RankedPlayerStats.Name  ,RankedPlayerStats.TimePassed ,RankedPlayerStats.Coins,RankedPlayerStats.NumberOfCoins,RankedPlayerStats.TimeClicked,RankedPlayerStats.LevelId,RankedPlayerStats.RowNum,Users.YearBorn , users.Mail\r\nFROM RankedPlayerStats\r\njoin Users\r\non Users.Name = RankedPlayerStats.Name\r\nWHERE RowNum=1 \r\ngroup by RankedPlayerStats.Name ,Users.YearBorn , users.Mail ,RankedPlayerStats.TimePassed ,RankedPlayerStats.Coins,RankedPlayerStats.NumberOfCoins,RankedPlayerStats.TimeClicked,RankedPlayerStats.LevelId,RankedPlayerStats.RowNum\r\nORDER BY RankedPlayerStats.Name, RankedPlayerStats.TimePassed ;\r\n";
+            SqlConnection connection = new SqlConnection(ConnectionString);
+            SqlCommand cmd = new SqlCommand(query, connection);
+            List<TimeToBeatPerUser> Stats = new List<TimeToBeatPerUser>();
+
+            try
+            {
+                connection.Open();
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    string name = (string)reader["Name"];
+                    int TimePassed = (int)reader["TimePassed"];
+                    int Coins = (int)reader["Coins"];
+                    int NumberOfCoins = (int)reader["NumberOfCoins"];
+                    int TimeClicked = (int)reader["TimeClicked"];
+                    int LevelId = (int)reader["LevelId"];
+                    var value = reader["RowNum"];
+                    int RowNum = int.Parse(value.ToString());
+                    int YearBorn = (int)reader["YearBorn"];
+                    string Mail = (string)reader["Mail"];
+                    Stats.Add(new TimeToBeatPerUser(name, TimePassed, Coins, NumberOfCoins,TimeClicked , LevelId,  RowNum,YearBorn,Mail));;
+
+                    //Stats.Add(new AvgStats2((string)reader["Name"], (int)reader["AmountOfGames"], Convert.ToDouble((float)(double)reader["AvgTimePassed"]), 3, 4, 5));
+                }
+                reader.Close();
+                return Stats;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e}");
+                return Stats;
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
+            }
+        }
+
+        List<TimeToBeatPerUser> IService1.LongestTimeTookUserToBeatLevel()
+        {
+            string query = $"\r\nWITH RankedPlayerStats AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER (PARTITION BY Name ORDER BY TimePassed Desc  ) AS RowNum\r\n    FROM PlayerStats\r\n    \r\n)\r\n\r\nSELECT RankedPlayerStats.Name  ,RankedPlayerStats.TimePassed ,RankedPlayerStats.Coins,RankedPlayerStats.NumberOfCoins,RankedPlayerStats.TimeClicked,RankedPlayerStats.LevelId,RankedPlayerStats.RowNum,Users.YearBorn , users.Mail\r\nFROM RankedPlayerStats\r\njoin Users\r\non Users.Name = RankedPlayerStats.Name\r\nWHERE RowNum=1 \r\ngroup by RankedPlayerStats.Name ,Users.YearBorn , users.Mail ,RankedPlayerStats.TimePassed ,RankedPlayerStats.Coins,RankedPlayerStats.NumberOfCoins,RankedPlayerStats.TimeClicked,RankedPlayerStats.LevelId,RankedPlayerStats.RowNum\r\nORDER BY RankedPlayerStats.Name, RankedPlayerStats.TimePassed ;\r\n\r\n\r\n\r\n\r\n";
+            SqlConnection connection = new SqlConnection(ConnectionString);
+            SqlCommand cmd = new SqlCommand(query, connection);
+            List<TimeToBeatPerUser> Stats = new List<TimeToBeatPerUser>();
+
+            try
+            {
+                connection.Open();
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    string name = (string)reader["Name"];
+                    int TimePassed = (int)reader["TimePassed"];
+                    int Coins = (int)reader["Coins"];
+                    int NumberOfCoins = (int)reader["NumberOfCoins"];
+                    int TimeClicked = (int)reader["TimeClicked"];
+                    int LevelId = (int)reader["LevelId"];
+                    var value = reader["RowNum"];
+                    int RowNum = int.Parse(value.ToString());
+                    int YearBorn = (int)reader["YearBorn"];
+                    string Mail = (string)reader["Mail"];
+                    Stats.Add(new TimeToBeatPerUser(name, TimePassed, Coins, NumberOfCoins, TimeClicked, LevelId, RowNum, YearBorn, Mail)); ;
+
+                    //Stats.Add(new AvgStats2((string)reader["Name"], (int)reader["AmountOfGames"], Convert.ToDouble((float)(double)reader["AvgTimePassed"]), 3, 4, 5));
+                }
+                reader.Close();
+                return Stats;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e}");
+                return Stats;
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
+            }
+        }
+
+        List<TimeToBeatPerUser> IService1.FastestTimeItTookToBeatEachLevel()
+        {
+            string query = $"\r\nWITH RankedPlayerStats AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER (PARTITION BY LevelId ORDER BY TimePassed   ) AS RowNum\r\n    FROM PlayerStats\r\n    \r\n)\r\n\r\nSELECT RankedPlayerStats.Name  ,RankedPlayerStats.TimePassed ,RankedPlayerStats.Coins,RankedPlayerStats.NumberOfCoins,RankedPlayerStats.TimeClicked,RankedPlayerStats.LevelId,RankedPlayerStats.RowNum,Users.YearBorn , users.Mail\r\nFROM RankedPlayerStats\r\njoin Users\r\non Users.Name = RankedPlayerStats.Name\r\nWHERE RowNum=1 \r\ngroup by RankedPlayerStats.Name ,Users.YearBorn , users.Mail ,RankedPlayerStats.TimePassed ,RankedPlayerStats.Coins,RankedPlayerStats.NumberOfCoins,RankedPlayerStats.TimeClicked,RankedPlayerStats.LevelId,RankedPlayerStats.RowNum\r\nORDER BY RankedPlayerStats.LevelId, RankedPlayerStats.TimePassed ;\r\n\r\n\r\n\r\n\r\n";
+            SqlConnection connection = new SqlConnection(ConnectionString);
+            SqlCommand cmd = new SqlCommand(query, connection);
+            List<TimeToBeatPerUser> Stats = new List<TimeToBeatPerUser>();
+
+            try
+            {
+                connection.Open();
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    string name = (string)reader["Name"];
+                    int TimePassed = (int)reader["TimePassed"];
+                    int Coins = (int)reader["Coins"];
+                    int NumberOfCoins = (int)reader["NumberOfCoins"];
+                    int TimeClicked = (int)reader["TimeClicked"];
+                    int LevelId = (int)reader["LevelId"];
+                    var value = reader["RowNum"];
+                    int RowNum = int.Parse(value.ToString());
+                    int YearBorn = (int)reader["YearBorn"];
+                    string Mail = (string)reader["Mail"];
+                    Stats.Add(new TimeToBeatPerUser(name, TimePassed, Coins, NumberOfCoins, TimeClicked, LevelId, RowNum, YearBorn, Mail)); ;
+
+                    //Stats.Add(new AvgStats2((string)reader["Name"], (int)reader["AmountOfGames"], Convert.ToDouble((float)(double)reader["AvgTimePassed"]), 3, 4, 5));
+                }
+                reader.Close();
+                return Stats;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e}");
+                return Stats;
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
+            }
+        }
+
+        List<TimeToBeatPerUser> IService1.SlowestTimeItTookToBeatEachLevel()
+        {
+            string query = $"\r\nWITH RankedPlayerStats AS (\r\n    SELECT *,\r\n           ROW_NUMBER() OVER (PARTITION BY LevelId ORDER BY TimePassed DESC   ) AS RowNum\r\n    FROM PlayerStats\r\n    \r\n)\r\n\r\nSELECT RankedPlayerStats.Name  ,RankedPlayerStats.TimePassed ,RankedPlayerStats.Coins,RankedPlayerStats.NumberOfCoins,RankedPlayerStats.TimeClicked,RankedPlayerStats.LevelId,RankedPlayerStats.RowNum,Users.YearBorn , users.Mail\r\nFROM RankedPlayerStats\r\njoin Users\r\non Users.Name = RankedPlayerStats.Name\r\nWHERE RowNum=1 \r\ngroup by RankedPlayerStats.Name ,Users.YearBorn , users.Mail ,RankedPlayerStats.TimePassed ,RankedPlayerStats.Coins,RankedPlayerStats.NumberOfCoins,RankedPlayerStats.TimeClicked,RankedPlayerStats.LevelId,RankedPlayerStats.RowNum\r\nORDER BY RankedPlayerStats.LevelId, RankedPlayerStats.TimePassed ;\r\n\r\n\r\n\r\n\r\n";
+            SqlConnection connection = new SqlConnection(ConnectionString);
+            SqlCommand cmd = new SqlCommand(query, connection);
+            List<TimeToBeatPerUser> Stats = new List<TimeToBeatPerUser>();
+
+            try
+            {
+                connection.Open();
+
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    string name = (string)reader["Name"];
+                    int TimePassed = (int)reader["TimePassed"];
+                    int Coins = (int)reader["Coins"];
+                    int NumberOfCoins = (int)reader["NumberOfCoins"];
+                    int TimeClicked = (int)reader["TimeClicked"];
+                    int LevelId = (int)reader["LevelId"];
+                    var value = reader["RowNum"];
+                    int RowNum = int.Parse(value.ToString());
+                    int YearBorn = (int)reader["YearBorn"];
+                    string Mail = (string)reader["Mail"];
+                    Stats.Add(new TimeToBeatPerUser(name, TimePassed, Coins, NumberOfCoins, TimeClicked, LevelId, RowNum, YearBorn, Mail)); ;
+
+                    //Stats.Add(new AvgStats2((string)reader["Name"], (int)reader["AmountOfGames"], Convert.ToDouble((float)(double)reader["AvgTimePassed"]), 3, 4, 5));
+                }
+                reader.Close();
+                return Stats;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error: {e}");
+                return Stats;
+            }
+            finally
+            {
+                if (connection.State == System.Data.ConnectionState.Open)
+                    connection.Close();
+            }
+        }
     }
 }
